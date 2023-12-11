@@ -1,0 +1,151 @@
+---
+title: 'Project #2'
+author: "Tejaswi Neelapu"
+output: html_document
+date: "2023-11-24"
+---
+```{r}
+library(nycflights13)
+library(tidyverse)
+
+United_Airlines <- flights %>% filter(carrier == "UA") %>% mutate(net_gain = dep_delay - arr_delay)
+glimpse(United_Airlines)
+```
+
+1.
+
+```{r}
+late_departures <- United_Airlines %>% filter(dep_delay > 0)
+not_late_departures <- United_Airlines %>% filter(dep_delay <= 0)
+
+t.test(not_late_departures$net_gain, late_departures$net_gain)
+
+United_Airlines <- United_Airlines %>%
+  mutate(dep_status = case_when(
+    dep_delay <= 0 ~ "Not Late Departures",
+    dep_delay > 0 ~ "Late Departures",
+  ))
+
+United_Airlines <- na.omit(United_Airlines)
+boxplot(net_gain ~ dep_status, data = United_Airlines,
+        main = "Net Gain Distribution for Different Departure Times",
+        xlab = "Departure Status",
+        ylab = "Net Gain")
+```
+
+
+```{r}
+very_late_departures <- United_Airlines %>% filter(dep_delay > 30)
+not_very_late_departures <- United_Airlines %>% filter(dep_delay <= 30)
+
+t.test(not_very_late_departures$net_gain, very_late_departures$net_gain)
+
+United_Airlines <- United_Airlines %>%
+  mutate(dep_status = case_when(
+    dep_delay <= 30 ~ "Not Very Late Departures",
+    dep_delay > 30 ~ "Very Late Departures",
+  ))
+
+United_Airlines <- na.omit(United_Airlines)
+boxplot(net_gain ~ dep_status, data = United_Airlines,
+        main = "Net Gain Distribution for Different Departure Times",
+        xlab = "Departure Status",
+        ylab = "Net Gain")
+```
+
+
+2.
+
+```{r}
+top_destinations <- United_Airlines %>%
+  group_by(dest) %>%
+  summarize(count = n(), avg_gain = mean(net_gain)) %>%
+  arrange(desc(count)) %>%
+  head(5)
+
+top_dest_flights <- United_Airlines %>% filter(dest %in% top_destinations$dest)
+top_dest_airports <- top_destinations$dest
+other_dest_flights <- United_Airlines %>% filter(!dest %in% top_dest_airports)
+
+ggplot(top_dest_flights, aes(x = dest, y = net_gain, fill = dest)) + geom_boxplot() + labs(title = "Net Gain Distribution for Top 5 UA Destination Airports", x = "Destination Airport", y = "Net Gain", fill = "Destination Airport")
+top_destinations
+top_dest_flights1 <- top_dest_flights %>% filter(dest == "IAH")
+top_dest_flights2 <- top_dest_flights %>% filter(dest == "ORD")
+top_dest_flights3 <- top_dest_flights %>% filter(dest == "SFO")
+top_dest_flights4 <- top_dest_flights %>% filter(dest == "LAX")
+top_dest_flights5 <- top_dest_flights %>% filter(dest == "DEN")
+t.test(top_dest_flights1$net_gain)$conf
+t.test(top_dest_flights2$net_gain)$conf
+t.test(top_dest_flights3$net_gain)$conf
+t.test(top_dest_flights4$net_gain)$conf
+t.test(top_dest_flights5$net_gain)$conf
+```
+
+
+3.
+
+```{r}
+United_Airlines <- United_Airlines %>%
+  mutate(gain_per_hour = net_gain / (air_time / 60))
+
+t.test(late_departures$gain_per_hour, not_late_departures$gain_per_hour)
+
+United_Airlines <- United_Airlines %>%
+  mutate(dep_status = case_when(
+    dep_delay <= 0 ~ "Not Late Departures",
+    dep_delay > 0 ~ "Late Departures",
+  ))
+
+ggplot(United_Airlines, aes(x = dep_status, y = net_gain / (air_time / 60), fill = dep_status)) +
+  geom_bar(stat = "summary", fun = "mean", position = "dodge") +
+  labs(title = "Average Gain per Hour for Flights by Departure Status",
+       x = "Departure Status",
+       y = "Average Gain per Hour",
+       fill = "Departure Status")
+```
+
+
+```{r}
+t.test(not_very_late_departures$gain_per_hour, very_late_departures$gain_per_hour)
+```
+
+```{r}
+
+United_Airlines <- United_Airlines %>%
+  mutate(dep_status = case_when(
+    dep_delay <= 30 ~ "Not Very Late Departures",
+    dep_delay > 30 ~ "Very Late Departures",
+  ))
+
+
+ggplot(United_Airlines, aes(x = dep_status, y = net_gain / (air_time / 60), fill = dep_status)) +
+  geom_bar(stat = "summary", fun = "mean", position = "dodge") +
+  labs(title = "Average Gain per Hour for Flights by Departure Status",
+       x = "Departure Status",
+       y = "Average Gain per Hour",
+       fill = "Departure Status")
+```
+
+
+4.
+
+```{r}
+United_Airlines <- United_Airlines %>%
+  mutate(flight_length = ifelse(air_time <= median(air_time), 'Short', 'Long'))
+
+short_flights <- flights %>% filter(flight_length == 'Short')
+long_flights <- flights %>% filter(flight_length == 'Long')
+
+t.test(short_flights$gain_per_hour, long_flights$gain_per_hour)
+
+ggplot(flights, aes(x = flight_length, y = net_gain / air_time, fill = flight_length)) +
+  geom_bar(stat = "summary", fun = "mean", position = "dodge") +
+  labs(title = "Average Gain per Hour for Short and Long Flights",
+       x = "Flight Length",
+       y = "Average Gain per Hour",
+       fill = "Flight Length")
+```
+
+
+
+
