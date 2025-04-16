@@ -1,16 +1,18 @@
 Analyzing United Airlines Flights from NYC: Efficiency & Gain Insights
 
 📌 Overview:
+
 This project explores the time efficiency of United Airlines (UA) flights departing from New York City using the nycflights13 dataset. The main objective is to quantify gain per flight — the time recovered or lost — using exploratory data analysis, hypothesis testing, and confidence intervals.
 
 🎯 Objectives:
-Analyze the difference in net gain for flights that departed on time vs. late.
 
-Identify the top 5 destination airports for UA flights and compare gain distributions.
+- Analyze the difference in net gain for flights that departed on time vs. late.
 
-Calculate gain per hour for late vs. on-time, very late vs. not very late, and short vs. long flights.
+- Identify the top 5 destination airports for UA flights and compare gain distributions.
 
-Use statistical inference (t-tests, CIs) to validate findings.
+- Calculate gain per hour for late vs. on-time, very late vs. not very late, and short vs. long flights.
+
+- Use statistical inference (t-tests, CIs) to validate findings.
 
 🧪 Methods:
 Data Wrangling & Feature Engineering (e.g., net_gain, gain_per_hour)
